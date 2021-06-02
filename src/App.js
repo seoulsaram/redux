@@ -1,5 +1,9 @@
+import {Route} from 'react-router';
 import './App.css';
 import CounterContainer from './containers/CounterContainer';
+import PostListContainer from './containers/PostListContainer';
+import PostPage from './containers/PostPage';
+import PostListPage from './pages/PostListPage';
 
 //설치
 //yarn add redux react-redux
@@ -9,7 +13,8 @@ import CounterContainer from './containers/CounterContainer';
 function App() {
   return (
     <div className="App">
-      <CounterContainer />
+      <Route path="/" component={PostListPage} exact={true} />
+      <Route path="/:id" component={PostPage} />
     </div>
   );
 }
