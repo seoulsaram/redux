@@ -13,6 +13,7 @@ import PostListPage from './pages/PostListPage';
 function App() {
   return (
     <div className="App">
+      <CounterContainer />
       <Route path="/" component={PostListPage} exact={true} />
       <Route path="/:id" component={PostPage} />
     </div>

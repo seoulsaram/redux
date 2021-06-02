@@ -1,20 +1,31 @@
-// Promise에 기반한 Thunk를 만들어주는 함수
-export const createPromiseThunk = (type, promiseCreator) => {
+import {call, put} from 'redux-saga/effects';
+
+//프로미스를 기다렸다가 결과를 디스패치하는 사가
+export const createPromiseSaga = (type, promiseCreator) => {
   const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
-
-  //이 함수는 promiseCreator가 단 하나의 파라미터만 받는다는 전제하에 작성됨
-  //만약 여러 종류의 파라미터를 전달해야 하는 상황에서는 객체 타입의 파라미터를 받아오도록 하면 됨
-  //예: writeComment({postId: 1, text: '댓글내용});
-
-  return (param) => async (dispatch) => {
-    //요청 시작
-    dispatch({type, param});
+  return function* saga(action) {
     try {
-      //결과물의 이름을 payload라는 이름으로 통일
-      const payload = await promiseCreator(param);
-      dispatch({type: SUCCESS, payload}); //성공
+      // 재사용성을 위하여 promiseCreator 의 파라미터엔 action.payload 값을 넣도록 설정합니다.
+      const payload = yield call(promiseCreator, action.payload);
+      yield put({type: SUCCESS, payload});
     } catch (e) {
-      dispatch({type: ERROR, payload: e, error: true}); //실패
+      yield put({type: ERROR, error: true, payload: e});
+    }
+  };
+};
+
+//특정 id의 데이터를 조회하는 용도로 사용하는 사가
+//API를 호출할 때 파라미터는 action.payload를 넣고,
+// id값을 action.meta로 설정한다.
+export const createPromiseSagaById = (type, promiseCreator) => {
+  const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
+  return function* saga(action) {
+    const id = action.meta;
+    try {
+      const payload = yield call(promiseCreator, action.payload);
+      yield put({type: SUCCESS, payload, meta: id});
+    } catch (e) {
+      yield put({type: ERROR, error: e, meta: id});
     }
   };
 };
